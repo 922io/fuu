@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff4f8">
+<title>🎀おさいふ帳</title>
+<style>
+:root{--bg:#fff4f8;--card:#fff;--text:#3b2933;--muted:#947d87;--accent:#ee82ad;--accent2:#f5a4c3;--line:#f4e3eb;--danger:#e85d75}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
+.app{max-width:760px;margin:auto;padding-bottom:105px}.header{padding:22px 18px 10px}.title{font-size:25px;font-weight:850;letter-spacing:.02em}.subtitle{color:var(--muted);font-size:13px;margin-top:4px}
+nav{position:fixed;z-index:10;bottom:10px;left:50%;transform:translateX(-50%);width:min(92%,430px);background:#ffffffee;border:1px solid #f4dce7;border-radius:22px;backdrop-filter:blur(14px);display:flex;justify-content:center;align-items:center;gap:3px;padding:6px;box-shadow:0 8px 25px #b85f8320}
+nav button{flex:1;border:0;background:transparent;border-radius:17px;padding:7px 5px 6px;font-size:11px;color:var(--muted);min-width:0;max-width:105px;transition:.15s}
+nav button.active{color:var(--accent);font-weight:850;background:#fff0f6;box-shadow:inset 0 0 0 1px #f8d8e6}
+nav .ico{font-size:20px;display:block;line-height:1.05;margin-bottom:2px}
+.page{display:none;padding:8px 16px}.page.active{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 3px 15px #b85f830b}
+.label{color:var(--muted);font-size:13px}.amount{font-size:28px;font-weight:850;margin-top:5px}.accent{color:var(--accent)}
+.section{margin:20px 0 9px;font-size:17px;font-weight:800}
+.progress{height:10px;background:#f9e5ee;border-radius:99px;overflow:hidden;margin-top:10px}.bar{height:100%;background:var(--accent);border-radius:99px;width:0}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.small{font-size:12px;color:var(--muted)}
+.btn{border:0;border-radius:13px;padding:11px 14px;background:var(--accent);color:#fff;font-weight:800}.btn.secondary{background:#fff0f6;color:var(--accent)}.btn.danger{background:#fff0f2;color:var(--danger)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
+.badge{display:inline-block;padding:4px 8px;border-radius:99px;background:#fff0f6;color:var(--accent);font-size:11px;font-weight:800;margin-right:5px}
+.money{font-weight:800;white-space:nowrap}
+.empty{text-align:center;color:var(--muted);padding:28px 8px}
+.barChart{padding:8px 0 2px}.barRow{display:grid;grid-template-columns:42px 1fr 72px;gap:8px;align-items:center;margin:9px 0}.barLabel{font-size:12px;color:var(--muted);text-align:right}.barTrack{height:20px;background:#fff0f6;border-radius:7px;overflow:hidden}.barFill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:7px;min-width:0}.barValue{font-size:12px;font-weight:800;text-align:right;white-space:nowrap}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ded9e9;border-radius:12px;background:#fff;color:var(--text);font:inherit}label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+dialog{border:0;border-radius:20px;padding:0;width:min(94%,500px);box-shadow:0 20px 70px #24194a55}dialog::backdrop{background:#24194a66}.modal{padding:20px}.modal h2{margin:0 0 5px;font-size:20px}
+.toast{position:fixed;z-index:30;bottom:75px;left:50%;transform:translateX(-50%);background:#29263a;color:#fff;padding:10px 15px;border-radius:99px;display:none;font-size:13px}
+@media(max-width:430px){.grid{gap:9px}.card{padding:14px}.amount{font-size:24px}.formgrid{grid-template-columns:1fr}}
+
+.titleRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.chargeTopBtn{border:0;border-radius:999px;padding:15px 24px;background:linear-gradient(135deg,#ee82ad,#f5a4c3);color:#fff;font-weight:850;font-size:16px;box-shadow:0 6px 16px #ee82ad33;white-space:nowrap}
+.quickAmount{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+.quickAmount .btn{padding:9px 12px}
+.radioRow{display:flex;gap:8px;flex-wrap:wrap}
+.radioChoice{flex:1;min-width:90px}
+.radioChoice input{position:absolute;opacity:0;pointer-events:none}
+.radioChoice span{display:block;text-align:center;padding:11px 8px;border:1px solid #eadde4;border-radius:12px;background:#fff}
+.radioChoice input:checked+span{border-color:var(--accent);background:#fff0f6;color:var(--accent);font-weight:800}
+.emojiSetting{display:grid;grid-template-columns:1fr 82px;gap:10px;align-items:end;margin:10px 0}
+.emojiSetting input{font-size:22px;text-align:center}
+.periodCard{margin-top:12px}
+@media(max-width:430px){.title{font-size:22px}.chargeTopBtn{font-size:15px;padding:14px 20px}.emojiSetting{grid-template-columns:1fr 70px}}
+
+.annualPlanList{display:grid;gap:10px}
+.annualMonth{background:#fff;border:1px solid #f3d7e5;border-radius:16px;overflow:hidden}
+.annualMonthTitle{padding:9px 13px;background:#fff4f8;color:#b84d79;font-weight:700}
+.annualMonthBody{padding:3px 12px 8px}
+.annualEvent{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px dashed #f0dbe4}
+.annualEvent:last-child{border-bottom:0}
+.annualDate{min-width:42px;font-weight:700;color:#b84d79}
+.annualEventMain{flex:1;min-width:0;overflow-wrap:anywhere}
+.annualEventTitle{font-weight:700}
+.annualEventMeta{font-size:12px;color:#888;margin-top:2px}
+.annualEmpty{padding:9px 0;color:#bbb;font-size:12px}
+.annualEvent .btn{flex:0 0 auto;padding:6px 9px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+  <div class="titleRow"><div class="title">🎀おさいふ帳</div><button class="chargeTopBtn" onclick="openCharge()">＋課金を記録</button></div>
+  <div class="subtitle" id="today"></div>
+</header>
+
+<section id="home" class="page active">
+  <div class="grid">
+    <div class="card"><div class="label">今月の課金</div><div class="amount" id="monthTotal">¥0</div></div>
+    <div class="card"><div class="label">今年の課金</div><div class="amount" id="yearTotal">¥0</div></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="row"><b>💖 今月の予算</b><span id="budgetText">未設定</span></div>
+    <div class="progress"><div class="bar" id="budgetBar"></div></div>
+    <div class="small" id="budgetSub" style="margin-top:8px"></div>
+    <button class="btn secondary" style="margin-top:10px" onclick="openBudget()">予算を設定</button>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="section" style="margin-bottom:2px">🎂 直近の予定</div>
+      <div class="small">今月〜来月の誕生日・記念日・ガチャなど</div>
+    </div>
+    <button class="btn secondary" onclick="openEvent()">＋予定</button>
+  </div>
+  <div class="card" id="homeEvents" style="margin-top:8px"></div>
+
+  <div class="section">🌼 最近の課金</div>
+  <div class="card" id="homeCharges"></div>
+
+</section>
+
+<section id="charges" class="page">
+  <div class="row"><div><div class="section" style="margin-top:5px">💳 課金履歴</div><div class="small" id="chargeCount"></div></div></div>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><div class="label">今月</div><div class="amount" id="historyMonthTotal">¥0</div></div>
+    <div class="card"><div class="label">今年</div><div class="amount" id="historyYearTotal">¥0</div></div>
+  </div>
+  <div class="section">🎮 ゲーム別</div>
+  <div class="card" id="historyGameStats"></div>
+  <div class="section">📆 月別（今年）</div>
+  <div class="card" id="historyMonthStats"></div>
+  <div class="section">🧾 履歴</div>
+  <div class="card" id="chargeList"></div>
+</section>
+
+
+<section id="mamaCard" class="page">
+  <div class="row">
+    <div><div class="section" style="margin-top:5px">💗 ままのカード</div><div class="small">課金以外の利用もまとめて管理できるよ</div></div>
+    <button class="btn" onclick="openMamaCharge()">＋利用額追加</button>
+  </div>
+  <div class="grid" style="margin-top:10px">
+    <div class="card"><div class="label">今月の利用額</div><div class="amount" id="mamaMonthTotal">¥0</div></div>
+    <div class="card"><div class="label">今年の利用額</div><div class="amount" id="mamaYearTotal">¥0</div></div>
+  </div>
+  <div class="section">💳 利用履歴</div>
+  <div class="card" id="mamaCardList"></div>
+</section>
+
+<section id="events" class="page">
+  <div class="row">
+    <div>
+      <div class="section" style="margin-top:5px">📅 年間予定</div>
+      <div class="small">誕生日・記念日・周年・その他</div>
+    </div>
+    <button type="button" class="btn eventAddBtn" onclick="openEvent()">＋予定の追加</button>
+  </div>
+  <div id="eventList" class="annualPlanList"></div>
+</section>
+
+
+
+<section id="settings" class="page">
+  <div class="section" style="margin-top:5px">⚙️ 設定</div>
+  <div class="card">
+    <label>ゲーム名（1行に1つ）</label>
+    <textarea id="gamesInput" rows="6"></textarea>
+    <label>今月の予算</label><input id="budgetInput" type="number" min="0" step="100">
+    <div class="section" style="margin:20px 0 8px;font-size:15px">🎀 誕生日・記念日・周年の絵文字</div>
+    <div class="small">ゲームごとに好きな絵文字を設定できるよ。例：💙、💚、🌸</div>
+    <div id="emojiSettings"></div>
+    <button class="btn" style="margin-top:14px" onclick="saveSettings()">保存</button>
+    <button class="btn danger" style="margin:10px 0 0 8px" onclick="resetAll()">全データを削除</button>
+  </div>
+  <div class="small" style="padding:14px 4px">データはこのブラウザ内に保存されます。端末やブラウザを変えると自動では共有されません。</div>
+</section>
+</div>
+
+<nav>
+ <button class="active" onclick="showPage('home',this)"><span class="ico">⌂</span>ホーム</button>
+ <button onclick="showPage('charges',this)"><span class="ico">💳</span>履歴</button>
+ <button onclick="showPage('mamaCard',this)"><span class="ico">💗</span>ままカード</button>
+ <button onclick="showPage('events',this)"><span class="ico">📅</span>予定</button>
+ <button onclick="showPage('settings',this)"><span class="ico">⚙️</span>設定</button>
+ </nav>
+
+<dialog id="chargeDlg"><div class="modal">
+<h2>💰 課金を記録</h2><div class="small">購入した内容を入力してね</div>
+<div class="formgrid"><div><label>日付</label><input id="cDate" type="date"></div><div><label>金額</label><input id="cAmount" type="number" min="0" step="100" placeholder="3000">
+<div class="quickAmount"><button type="button" class="btn secondary" onclick="setQuickAmount(10000)">＋10,000円</button></div></div></div>
+<label>ゲーム</label><select id="cGame"></select>
+<label>支払い方法</label>
+<div class="radioRow">
+  <label class="radioChoice"><input type="radio" name="paymentMethod" value="クレカ" checked><span>クレカ</span></label>
+  <label class="radioChoice"><input type="radio" name="paymentMethod" value="ままのカード"><span>ままのカード</span></label>
+  <label class="radioChoice"><input type="radio" name="paymentMethod" value="その他"><span>その他</span></label>
+</div>
+<label>内容</label><input id="cMemo" placeholder="例：一織BDガチャ">
+<div class="actions" style="margin-top:15px"><button class="btn" onclick="addCharge()">保存</button><button class="btn secondary" onclick="closeDlg('chargeDlg')">キャンセル</button></div>
+</div></dialog>
+
+
+<dialog id="mamaDlg"><div class="modal">
+<h2>💗 ままのカード 利用額を追加</h2><div class="small">課金以外のカード利用を記録してね</div>
+<div class="formgrid"><div><label>日付</label><input id="mDate" type="date"></div><div><label>金額</label><input id="mAmount" type="number" min="0" step="100" placeholder="5000"></div></div>
+<label>用途</label><input id="mMemo" placeholder="例：服、食費、日用品">
+<div class="actions" style="margin-top:15px"><button class="btn" onclick="addMamaCharge()">保存</button><button class="btn secondary" onclick="closeDlg('mamaDlg')">キャンセル</button></div>
+</div></dialog>
+
+<dialog id="eventDlg"><div class="modal">
+<h2>📅 予定を追加</h2>
+<div class="formgrid"><div><label>日付</label><input id="eDate" type="date"></div><div><label>予定予算</label><input id="eAmount" type="number" min="0" step="100" placeholder="10000"></div></div>
+<label>ゲーム</label><select id="eGame"></select>
+<label>種類</label>
+<select id="eType">
+<option>🎂 誕生日</option>
+<option>🎀 記念日</option>
+<option>🎉 周年</option>
+<option>📦 その他</option>
+</select>
+<label>内容</label><input id="eMemo" placeholder="例：一織 Birthday">
+<label id="repeatLabel"><input id="eRepeat" type="checkbox" checked style="width:auto;margin-right:6px">毎年繰り返す</label>
+<div class="actions" style="margin-top:15px"><button type="button" class="btn" onclick="addEvent()">保存</button><button type="button" class="btn secondary" onclick="closeDlg('eventDlg')">キャンセル</button></div>
+</div></dialog>
+
+<dialog id="budgetDlg"><div class="modal"><h2>💰 今月の予算</h2><label>予算</label><input id="bAmount" type="number" min="0" step="100"><div class="actions" style="margin-top:15px"><button class="btn" onclick="setBudget()">保存</button><button class="btn secondary" onclick="closeDlg('budgetDlg')">キャンセル</button></div></div></dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='oshi_charge_manager_v1';
+const DEFAULT_BUDGET=50000;
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{charges:[],events:[],games:['アイドリッシュセブン','18TRIP'],budgets:{},gameEmojis:{},mamaCard:[]};
+db.charges=db.charges||[];db.events=db.events||[];db.games=db.games||['アイドリッシュセブン','18TRIP'];db.budgets=db.budgets||{};db.gameEmojis=db.gameEmojis||{};db.mamaCard=db.mamaCard||[];
+db.charges.forEach(x=>{if(!x.payment)x.payment='クレカ'});
+const $=id=>document.getElementById(id);
+const yen=n=>'¥'+Number(n||0).toLocaleString('ja-JP');
+const pad=n=>String(n).padStart(2,'0');
+const todayStr=()=>{let d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const monthKey=()=>{let d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)};
+const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
+function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',1800)}
+function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');render()}
+function openDlg(id){$(id).showModal()} function closeDlg(id){$(id).close()}
+function fillGames(){['cGame','eGame'].forEach(id=>{$(id).innerHTML=db.games.map(g=>`<option>${esc(g)}</option>`).join('')})}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function openCharge(){
+  $('cDate').value=todayStr();
+  $('cAmount').value='';
+  $('cMemo').value='';
+  document.querySelector('input[name="paymentMethod"][value="クレカ"]').checked=true;
+  fillGames();
+  openDlg('chargeDlg');
+}
+function setQuickAmount(n){$('cAmount').value=n}
+function toggleRepeatOption(){let on=['🎂 誕生日','🎀 記念日','🎉 周年'].includes($('eType').value);$('repeatLabel').style.display=on?'block':'none';if(!on)$('eRepeat').checked=false}
+function openEvent(kind='normal'){
+  $('eDate').value=todayStr();
+  $('eAmount').value='';
+  $('eMemo').value='';
+  fillGames();
+  $('eType').value='🎂 誕生日';
+  $('eRepeat').checked=true;
+  $('repeatLabel').style.display='block';
+  openDlg('eventDlg');
+}
+function openBudget(){$('bAmount').value=db.budgets[monthKey()]??DEFAULT_BUDGET;openDlg('budgetDlg')}
+function addCharge(){
+  let amount=+$('cAmount').value;
+  if(!amount)return toast('金額を入力してね');
+  let payment=document.querySelector('input[name="paymentMethod"]:checked')?.value||'クレカ';
+  db.charges.push({id:Date.now(),date:$('cDate').value||todayStr(),game:$('cGame').value,amount,payment,memo:$('cMemo').value.trim()});
+  save();closeDlg('chargeDlg');toast('課金を記録したよ');render()
+}
+
+function openMamaCharge(){
+  $('mDate').value=todayStr();$('mAmount').value='';$('mMemo').value='';openDlg('mamaDlg')
+}
+function addMamaCharge(){
+  let amount=+$('mAmount').value;
+  if(!amount)return toast('金額を入力してね');
+  db.mamaCard.push({id:Date.now(),date:$('mDate').value||todayStr(),amount,memo:$('mMemo').value.trim()});
+  save();closeDlg('mamaDlg');toast('ままのカード利用を記録したよ');render()
+}
+function delMamaCharge(id){
+  if(confirm('このままのカード利用を削除する？')){
+    db.mamaCard=db.mamaCard.filter(x=>x.id!==id);save();render()
+  }
+}
+function renderMamaCard(){
+  const now=new Date(), y=now.getFullYear(), m=pad(now.getMonth()+1);
+  const monthPrefix=`${y}-${m}`;
+  const mamaCharges=db.charges.filter(x=>(x.payment||'クレカ')==='ままのカード').map(x=>({...x,memo:x.memo||'課金',kind:'課金'}));
+  const other=db.mamaCard.map(x=>({...x,kind:'カード利用'}));
+  const all=[...mamaCharges,...other].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const monthTotal=all.filter(x=>x.date.startsWith(monthPrefix)).reduce((a,x)=>a+x.amount,0);
+  const yearTotal=all.filter(x=>x.date.startsWith(y+'-')).reduce((a,x)=>a+x.amount,0);
+  $('mamaMonthTotal').textContent=yen(monthTotal);
+  $('mamaYearTotal').textContent=yen(yearTotal);
+  $('mamaCardList').innerHTML=all.length
+    ? all.map(x=>`<div class="item"><div><b>${esc(x.memo||x.kind)}</b><div class="small">${fmtDate(x.date)} ・ ${esc(x.kind)}${x.game?' ・ '+esc(x.game):''}</div></div><div style="text-align:right"><div class="money">${yen(x.amount)}</div>${x.kind==='カード利用'?`<button class="btn danger" style="padding:5px 8px;margin-top:5px" onclick="delMamaCharge(${x.id})">削除</button>`:''}</div></div>`).join('')
+    : '<div class="empty">ままのカード利用はまだないよ💗</div>';
+}
+function addEvent(){
+  const event={
+    id:Date.now(),
+    date:$('eDate').value||todayStr(),
+    game:$('eGame').value||'',
+    type:$('eType').value||'📦 その他',
+    repeat:!!$('eRepeat').checked,
+    amount:+$('eAmount').value||0,
+    memo:$('eMemo').value.trim()
+  };
+  db.events.push(event);
+  save();
+  closeDlg('eventDlg');
+  toast(event.repeat?'毎年の予定を追加したよ':'予定を追加したよ');
+  render();
+}
+function setBudget(){db.budgets[monthKey()]=Math.max(0,+$('bAmount').value||0);save();closeDlg('budgetDlg');toast('今月の予算を保存したよ');render()}
+function delCharge(id){if(confirm('この課金記録を削除する？')){db.charges=db.charges.filter(x=>x.id!==id);save();render()}}
+function delEvent(id){if(confirm('この予定を削除する？')){db.events=db.events.filter(x=>x.id!==id);save();render()}}
+function fmtDate(s){let [y,m,d]=s.split('-');return `${m}/${d}`}
+function totals(){let now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;let month=db.charges.filter(x=>x.date.startsWith(`${y}-${pad(m)}`)).reduce((a,x)=>a+x.amount,0);let year=db.charges.filter(x=>x.date.startsWith(y+'-')).reduce((a,x)=>a+x.amount,0);return{month,year}}
+function eventOccurrence(x,year){let [oy,om,od]=x.date.split('-').map(Number);return {...x,displayDate:x.repeat?`${year}-${pad(om)}-${pad(od)}`:x.date}}
+function nextOccurrence(x,from=new Date()){
+  if(!x.repeat)return eventOccurrence(x,new Date(x.date+'T00:00:00').getFullYear());
+  let [y,m,d]=x.date.split('-').map(Number);
+  let thisYear=new Date(from.getFullYear(),m-1,d);
+  return eventOccurrence(x,thisYear>=new Date(from.getFullYear(),from.getMonth(),from.getDate())?from.getFullYear():from.getFullYear()+1);
+}
+function upcomingEvents(limit=8){
+  const today=new Date();today.setHours(0,0,0,0);
+  const y=today.getFullYear(),m=today.getMonth();
+  const nextMonth=new Date(y,m+2,0);
+  const minDate=`${y}-${pad(m+1)}-01`;
+  const maxDate=`${nextMonth.getFullYear()}-${pad(nextMonth.getMonth()+1)}-${pad(nextMonth.getDate())}`;
+  let out=[];
+  db.events.forEach(x=>{
+    if(x.repeat){
+      let [oy,om,od]=x.date.split('-').map(Number);
+      for(let yy=y;yy<=y+1;yy++){
+        let occ=eventOccurrence(x,yy);
+        if(occ.displayDate>=minDate&&occ.displayDate<=maxDate)out.push(occ);
+      }
+    }else if(x.date>=minDate&&x.date<=maxDate){out.push(eventOccurrence(x,y))}
+  });
+  return out.sort((a,b)=>a.displayDate.localeCompare(b.displayDate)).slice(0,limit);
+}
+function eventHTML(x){return `<div class="item"><div><span class="badge">${esc(x.type)}${x.repeat?' ↻':''}</span><b>${esc(x.memo||'予定')}</b><div class="small">${fmtDate(x.displayDate||x.date)} ・ ${esc(x.game)}${x.amount?' ・ 予算 '+yen(x.amount):''}${x.repeat?' ・ 毎年':''}</div></div><button class="btn danger" onclick="delEvent(${x.id})">削除</button></div>`}
+function render(){
+  $('today').textContent=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+  let {month,year}=totals();$('monthTotal').textContent=yen(month);$('yearTotal').textContent=yen(year);
+  let budget=db.budgets[monthKey()]??DEFAULT_BUDGET;
+  $('budgetText').textContent=`${yen(month)} / ${yen(budget)}`;
+  $('budgetSub').textContent=month<=budget?`残り ${yen(budget-month)}`:`予算オーバー ${yen(month-budget)}`;
+  $('budgetBar').style.width=budget?Math.min(100,month/budget*100)+'%':'0%';
+  renderHome();renderCharges();renderMamaCard();renderEvents();renderSettings();
+}
+function renderHome(){
+  let ev=upcomingEvents(8);
+  $('homeEvents').innerHTML=ev.length?ev.map(eventHTML).join(''):'<div class="empty">今月〜来月の予定はまだないよ🎀</div>';
+  let charges=[...db.charges].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  $('homeCharges').innerHTML=charges.length
+    ?charges.map(x=>`<div class="item"><div><b>${esc(x.memo||'課金')}</b><div class="small">${fmtDate(x.date)} ・ ${esc(x.game)} ・ ${esc(x.payment||'クレカ')}</div></div><div class="money">${yen(x.amount)}</div></div>`).join('')
+    :'<div class="empty">課金履歴はまだないよ💗</div>';
+}
+function getMamaCardPeriod(){
+  const now=new Date(); now.setHours(0,0,0,0);
+  let start,end;
+  if(now.getDate()<=15){
+    start=new Date(now.getFullYear(),now.getMonth()-1,16);
+    end=new Date(now.getFullYear(),now.getMonth(),15);
+  }else{
+    start=new Date(now.getFullYear(),now.getMonth(),16);
+    end=new Date(now.getFullYear(),now.getMonth()+1,15);
+  }
+  return {start,end};
+}
+function dateObjToStr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function renderCharges(){
+  let a=[...db.charges].sort((x,y)=>y.date.localeCompare(x.date));
+  $('chargeCount').textContent=`${a.length}件`;
+  $('chargeList').innerHTML=a.length?a.map(x=>`<div class="item"><div><b>${esc(x.memo||'課金')}</b><div class="small">${fmtDate(x.date)} ・ ${esc(x.game)} ・ ${esc(x.payment||'クレカ')}</div></div><div style="text-align:right"><div class="money">${yen(x.amount)}</div><button class="btn danger" style="padding:5px 8px;margin-top:5px" onclick="delCharge(${x.id})">削除</button></div></div>`).join(''):'<div class="empty">課金履歴はまだないよ💳</div>';
+  let {month,year}=totals();
+  $('historyMonthTotal').textContent=yen(month);$('historyYearTotal').textContent=yen(year);
+
+  const {start,end}=getMamaCardPeriod();
+  const s=dateObjToStr(start), e=dateObjToStr(end);
+  const mamaTotal=db.charges.filter(x=>(x.payment||'クレカ')==='ままのカード'&&x.date>=s&&x.date<=e).reduce((a,x)=>a+x.amount,0);
+
+  let gs={};db.charges.forEach(x=>gs[x.game]=(gs[x.game]||0)+x.amount);
+  $('historyGameStats').innerHTML=Object.keys(gs).length
+    ?Object.entries(gs).sort((a,b)=>b[1]-a[1]).map(([g,n])=>`<div class="item"><span>${esc(g)}</span><span class="money">${yen(n)}</span></div>`).join('')
+    :'<div class="empty">まだデータがないよ</div>';
+
+  let months=Array(12).fill(0), y=new Date().getFullYear();
+  db.charges.filter(x=>x.date.startsWith(y+'-')).forEach(x=>months[+x.date.slice(5,7)-1]+=x.amount);
+  let max=Math.max(...months,1);
+  $('historyMonthStats').innerHTML=`<div class="barChart">${months.map((n,i)=>`<div class="barRow"><div class="barLabel">${i+1}月</div><div class="barTrack"><div class="barFill" style="width:${n?Math.max(2,n/max*100):0}%"></div></div><div class="barValue">${yen(n)}</div></div>`).join('')}</div>`;
+}
+function gameEmoji(game){
+  const defaults={
+    'アイドリッシュセブン':'🎤',
+    '18TRIP':'🚏'
+  };
+  return db.gameEmojis[game]||defaults[game]||'🎮';
+}
+function isAnniversaryEvent(x){
+  return ['🎂 誕生日','🎀 記念日','🎉 周年'].includes(x.type);
+}
+function renderEvents(){
+  const monthNames=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const all=Array.isArray(db.events)?db.events:[];
+
+  $('eventList').innerHTML=monthNames.map((name,mi)=>{
+    const month=String(mi+1).padStart(2,'0');
+
+    const events=all.filter(e=>{
+      const date=String(e.date||'');
+      return date.length>=7 && date.slice(5,7)===month;
+    }).sort((a,b)=>{
+      const ad=String(a.date||'').slice(8,10);
+      const bd=String(b.date||'').slice(8,10);
+      return Number(ad||99)-Number(bd||99);
+    });
+
+    return `<div class="annualMonth">
+      <div class="annualMonthTitle">📅 ${name}</div>
+      <div class="annualMonthBody">
+        ${events.length ? events.map(e=>{
+          const day=String(e.date||'').slice(8,10).replace(/^0/,'')||'--';
+          const emoji=typeof gameEmoji==='function' ? gameEmoji(e.game) : '🎮';
+          const memo=e.memo||'予定';
+          const game=e.game||'';
+          const type=e.type||'📦 その他';
+          const repeat=e.repeat ? ' ・ 毎年' : '';
+          const amount=e.amount ? ' ・ 予算 '+yen(e.amount) : '';
+
+          return `<div class="annualEvent">
+            <div class="annualDate">${day}日</div>
+            <div class="annualEventMain">
+              <div class="annualEventTitle">${emoji} ${esc(memo)}</div>
+              <div class="annualEventMeta">${esc(game)}${game?' ・ ':''}${esc(type)}${repeat}${amount}</div>
+            </div>
+            <button type="button" class="btn danger" onclick="delEvent(${e.id})">削除</button>
+          </div>`;
+        }).join('') : '<div class="annualEmpty">予定なし</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderEmojiSettings(games, preserved={}){
+  $('emojiSettings').innerHTML=games.map((g,i)=>{
+    const current=preserved[g]??db.gameEmojis[g]??'';
+    return `<div class="emojiSetting"><div><label>${esc(g)}</label><div class="small">誕生日・記念日・周年で表示</div></div><input id="gameEmoji_${i}" maxlength="4" placeholder="🎮" value="${esc(current)}"></div>`;
+  }).join('');
+}
+function getEmojiInputsByGame(games){
+  const out={};
+  games.forEach((g,i)=>{ out[g]=($('gameEmoji_'+i)?.value||'').trim(); });
+  return out;
+}
+function renderSettings(){
+  $('gamesInput').value=db.games.join('\n');
+  $('budgetInput').value=db.budgets[monthKey()]??DEFAULT_BUDGET;
+  renderEmojiSettings(db.games);
+  $('gamesInput').oninput=()=>{
+    const games=$('gamesInput').value.split('\n').map(x=>x.trim()).filter(Boolean);
+    const preserved=getEmojiInputsByGame(db.games);
+    renderEmojiSettings(games,preserved);
+  };
+}
+function saveSettings(){
+  const oldGames=[...db.games];
+  const oldEmojis={...db.gameEmojis};
+  const emojiValues=getEmojiInputsByGame(oldGames);
+  db.games=$('gamesInput').value.split('\n').map(x=>x.trim()).filter(Boolean);
+  db.budgets[monthKey()]=Math.max(0,+$('budgetInput').value||0);
+  db.gameEmojis={};
+  db.games.forEach(g=>{
+    db.gameEmojis[g]=(emojiValues[g]||oldEmojis[g]||'').trim()||'🎮';
+  });
+  save();fillGames();toast('設定を保存したよ');render()
+}
+function resetAll(){if(confirm('課金・予定・設定を全部削除する？')){localStorage.removeItem(KEY);location.reload()}}
+render();
+</script>
+</body></html>
